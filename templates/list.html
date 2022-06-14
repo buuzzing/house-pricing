@@ -1,0 +1,44 @@
+{% extends 'base/base.html' %}
+
+{% block title %}
+    房价列表
+{% endblock %}
+
+{% block two %}
+    layui-this
+{% endblock %}
+
+{% block main_body %}
+    <div style="margin-left: 20px; margin-right: 20px">
+        <table class="layui-hide" id="house_list"></table>
+    </div>
+{% endblock %}
+
+{% block own_js %}
+    <script>
+        layui.use('table', function () {
+            let table = layui.table;
+
+            table.render({
+                elem: '#house_list'
+                , height: 'full-120'
+                , cellMinWidth: 80
+                , limit: 20
+                , url: '/api/getHouseList'
+                , page: true
+                , cols: [[
+                    {field: 'id', title: 'ID', sort: true, fixed: 'left'}
+                    , {field: 'house_name', title: '小区'}
+                    , {field: 'location', title: '位置'}
+                    , {field: 'house_type', title: '户型'}
+                    , {field: 'unit_price', title: '每平米房价'}
+                    , {field: 'tot_price', title: '总价'}
+                    , {field: 'floor', title: '楼层'}
+                    , {field: 'area', title: '面积'}
+                    , {field: 'build_time', title: '建造时间'}
+                    , {field: 'lift_type', title: '梯形'}
+                ]]
+            });
+        })
+    </script>
+{% endblock %}
