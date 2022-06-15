@@ -30,6 +30,16 @@ def logout():
     return jsonify({})
 
 
+@api_blueprint.route('/register', methods=['POST'])
+def register():
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    res = HouseDB.insert(f'INSERT INTO user VALUES (\'{username}\', \'{password}\');')
+
+    return jsonify({'code': res})
+
+
 @api_blueprint.route('/getHouseList', methods=['GET'])
 def get_house_list():
     page = int(request.args.get('page'))
