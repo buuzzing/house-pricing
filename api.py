@@ -24,6 +24,12 @@ def login():
         return jsonify({'code': 0})
 
 
+@api_blueprint.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user', None)
+    return jsonify({})
+
+
 @api_blueprint.route('/getHouseList', methods=['GET'])
 def get_house_list():
     page = int(request.args.get('page'))
