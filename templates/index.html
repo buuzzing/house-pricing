@@ -22,19 +22,3 @@
         </div>
     </div>
 {% endblock %}
-
-
-{% if session.get('user') != None %}
-    {% block own_js %}
-        <script>
-            layui.use([], function () {
-                let $ = layui.$;
-
-                $('#logout').on('click', function () {
-                    window.location.replace('/logout')
-                })
-
-            })
-        </script>
-    {% endblock %}
-{% endif %}

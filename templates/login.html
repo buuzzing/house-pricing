@@ -161,7 +161,8 @@
         }
 
         body {
-            background: url({{ url_for('static', filename='images/loginbg.jpg') }}) 0% 0% / cover no-repeat;
+            background: url({{ url_for('static', filename='images/loginbg.png') }}) 0 0 / cover no-repeat;
+            opacity: 0.8;
             position: static;
             font-size: 12px;
         }
@@ -230,14 +231,6 @@
             letter-spacing: 0;
             cursor: pointer;
             border: none;
-        }
-
-        .login-main .login-bottom .center .item .validateImg {
-            position: absolute;
-            right: 1px;
-            cursor: pointer;
-            height: 36px;
-            border: 1px solid #e6e6e6;
         }
 
         .footer {
@@ -310,7 +303,7 @@
     </div>
 </div>
 <div class="footer">
-    软件工程 19 组预房真团队<span class="padding-5">|</span><a target="_blank" href="https://www.bing.com">项目地址</a>
+    软件工程 19 组预房真团队<span class="padding-5">|</span><a target="_blank" href="https://jihulab.com/buzzing/house-pricing">项目地址</a>
 </div>
 <script src="{{ url_for('static', filename='layui.js') }}" charset="utf-8"></script>
 <script>
@@ -359,12 +352,11 @@
                 , success: function (data) {
                     if (data.code === 0) {
                         layer.msg('登录成功', function () {
-                            window.location.replace('/')
+                            let index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
                         });
                     } else {
                         layer.msg('用户名或密码错误');
-                        document.getElementsByName('username').value = ''
-                        document.getElementsByName('password').value = ''
                     }
                 }
             })
