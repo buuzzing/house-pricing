@@ -10,14 +10,27 @@
 
 {% block main_body %}
     <div class="layui-container">
-        <div class="layui-row" style="margin-top: 20px">
-            <div class="layui-col-md12">
-                <div id="avg_price_echarts" style="width: 1200px; height:400px;"></div>
+        <div class="layui-row" style="height: 50px; margin-top: 20px;">
+            <div class="layui-col-md3 layui-col-md-offset9">
+                <div class="layui-form">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" style="width: 100px;">当前显示图表：</label>
+                        <div class="layui-input-inline" style="width: 100px;">
+                            <input type="checkbox" name="charts_switch" lay-filter="charts_switch" lay-skin="switch"
+                                   lay-text="售价|销售额" checked>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="layui-row" style="margin-top: 20px">
             <div class="layui-col-md12">
-                <div id="sales_price_echarts" style="width: 1200px; height: 400px;"></div>
+                <div id="avg_price_echarts" style="width: 1200px; height:650px;"></div>
+            </div>
+        </div>
+        <div class="layui-row" style="margin-top: 20px">
+            <div class="layui-col-md12">
+                <div id="sales_price_echarts" style="width: 1200px; height: 650px;"></div>
             </div>
         </div>
     </div>
@@ -66,7 +79,7 @@
                 },
                 yAxis: {
                     type: 'value',
-                    min: 3000,
+                    min: 0,
                     max: 18000,
                     interval: 3000
                 },
@@ -161,6 +174,23 @@
         ];
 
         option_price && myChart_avg.setOption(option_price);
-        option_sales && myChart_sales.setOption(option_sales);
+        document.getElementById('sales_price_echarts').style.display = 'none';
+
+        layui.use(['form'], function () {
+            let form = layui.form;
+            form.on('switch(charts_switch)', function (data) {
+                if (data.elem.checked === true) {
+                    myChart_avg.clear();
+                    myChart_avg.setOption(option_price);
+                    document.getElementById('avg_price_echarts').style.display = '';
+                    document.getElementById('sales_price_echarts').style.display = 'none';
+                } else {
+                    myChart_sales.clear();
+                    option_sales && myChart_sales.setOption(option_sales);
+                    document.getElementById('avg_price_echarts').style.display = 'none';
+                    document.getElementById('sales_price_echarts').style.display = '';
+                }
+            })
+        });
     </script>
 {% endblock %}
