@@ -42,13 +42,11 @@
         </div>
     </div>
 
-    <div class="layui-body">
+    <div class="layui-body" style="background: url({{ url_for('static', filename='images/background.png') }}) no-repeat; background-size: cover;")>
         <!-- 内容主体区域 -->
         {% block main_body %}
         {% endblock %}
     </div>
-
-    {% include 'base/footer.html' %}
 
     {% block others %}
     {% endblock %}
