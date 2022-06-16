@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, render_template, request, session, redirect
 from pyecharts import options as opts
 from pyecharts.charts import Bar, Map
@@ -11,8 +13,7 @@ app.secret_key = '0x7f'
 app.register_blueprint(api_blueprint)
 
 
-@app.route('/')
-def show_index():
+def get_dis_val():
     res = HouseDB.query_res('SELECT location, unit_price FROM houseinfo;')
 
     nums = {}
@@ -27,6 +28,40 @@ def show_index():
 
     dis = list(nums.keys())
     val = [round(prices[dis_name] / nums[dis_name], 2) for dis_name in dis]
+
+    return dis, val
+
+
+@app.route('/')
+def show_index():
+    return render_template('index.html')
+
+
+@app.route('/list')
+def show_list():
+    return render_template('list.html')
+
+
+@app.route('/pic1')
+def show_pic1():
+    with open('static/database/avg_price.json', 'r') as f:
+        avg_price = f.read()
+    with open('static/database/sales_volume.json', 'r') as f:
+        sales_volume = f.read()
+    date = [i for i in range(2002, 2021)]
+    avg_price_label = ['商品房', '住宅商品房', '别墅', '办公楼', '商业营业用房', '其他']
+    avg_price = json.loads(avg_price)
+    sales_volume = json.loads(sales_volume)
+    return render_template('pic1.html',
+                           date=date,
+                           avg_price_label=avg_price_label,
+                           avg_price=avg_price,
+                           sales_volume=sales_volume)
+
+
+@app.route('/pic2')
+def show_pic2():
+    dis, val = get_dis_val()
 
     house_map = (
         Map(init_opts=opts.InitOpts(theme=ThemeType.MACARONS, width='1200px', height='700px'))
@@ -52,51 +87,13 @@ def show_index():
         )
         .render_embed()
     )
-    return render_template('index.html', house_map=house_map)
 
-
-@app.route('/list')
-def show_list():
-    return render_template('list.html')
-
-
-@app.route('/pic1')
-def show_pic1():
-    res = HouseDB.query_res('SELECT location, unit_price FROM houseinfo;')
-
-    nums = {}
-    prices = {}
-    for row in res:
-        if row[0].split()[0] not in nums:
-            nums[row[0].split()[0]] = 1
-            prices[row[0].split()[0]] = 0.
-        else:
-            nums[row[0].split()[0]] += 1
-        prices[row[0].split()[0]] += float(row[1])
-
-    dis = list(nums.keys())
-    val = [round(prices[dis_name] / nums[dis_name], 2) for dis_name in dis]
-
-    bar = Bar()
-    bar.add_xaxis(dis)
-    bar.add_yaxis("每平米平均房价（单位：元）", val, color='#4b5cc4', category_gap='30%')
-    return render_template('pic1.html', myechart=bar.render_embed())
-
-
-@app.route('/pic2')
-def show_pic2():
-    return render_template('pic2.html')
+    return render_template('pic2.html', house_map=house_map)
 
 
 @app.route('/surrounding')
 def show_surrounding():
     return render_template('surrounding.html')
-
-
-@app.route('/logout', methods=['GET'])
-def logout():
-    session.pop('user', None)
-    return redirect('/', 302)
 
 
 @app.route('/login_page')

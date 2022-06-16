@@ -9,16 +9,5 @@
 {% endblock %}
 
 {% block main_body %}
-    <div class="layui-fluid">
-        <div class="layui-row">
-            <div class="layui-col-md10 layui-col-md-offset1">
-                {% if session.get('user') == None %}
-                    <h1 style="padding: 15px;">您尚未登录</h1>
-                {% else %}
-                    <h1 style="padding: 15px;">{{ session.get('user') }} 已登录</h1>
-                {% endif %}
-                {{ house_map|safe }}
-            </div>
-        </div>
-    </div>
+    <h1>index</h1>
 {% endblock %}

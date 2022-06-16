@@ -6,6 +6,7 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layui.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/logo.svg') }}">
+    <script src="{{ url_for('static', filename='js/echarts.js') }}"></script>
     {% block own_head %}
     {% endblock %}
 </head>
@@ -29,7 +30,7 @@
                     <a href="javascript:;"><i class="layui-icon layui-icon-console"
                                               style="margin-right: 5%"></i>房价分析</a>
                     <dl class="layui-nav-child">
-                        <dd class="{% block three %}{% endblock %}"><a href="/pic1">柱状图</a></dd>
+                        <dd class="{% block three %}{% endblock %}"><a href="/pic1">整体房价走势</a></dd>
                         <dd class="{% block four %}{% endblock %}"><a href="/pic2">热力图</a></dd>
                     </dl>
                 </li>

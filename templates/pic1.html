@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 
 {% block title %}
-    散点图
+    整体房价走势
 {% endblock %}
 
 {% block three %}
@@ -9,6 +9,158 @@
 {% endblock %}
 
 {% block main_body %}
-    <h1 style="padding: 15px">柱状图页</h1>
-    {{ myechart|safe }}
+    <div class="layui-container">
+        <div class="layui-row" style="margin-top: 20px">
+            <div class="layui-col-md12">
+                <div id="avg_price_echarts" style="width: 1200px; height:400px;"></div>
+            </div>
+        </div>
+        <div class="layui-row" style="margin-top: 20px">
+            <div class="layui-col-md12">
+                <div id="sales_price_echarts" style="width: 1200px; height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block own_js %}
+    <script>
+        let myChart_avg = echarts.init(document.getElementById('avg_price_echarts'));
+        let myChart_sales = echarts.init(document.getElementById('sales_price_echarts'));
+        let option_price;
+
+        let date_label = {{ date|tojson }};
+        let avg_price_label = {{ avg_price_label|tojson }};
+        let avg_price = {{ avg_price|tojson }};
+        let sales_volume = {{ sales_volume|tojson }}
+
+            option_price = {
+                title: {
+                    text: '按用途分商品房平均销售价格 （元/平米）',
+                    x: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: avg_price_label,
+                    x: 'center',
+                    top: '5%',
+                    bottom: '3%'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: date_label.slice(-10)
+                },
+                yAxis: {
+                    type: 'value',
+                    min: 3000,
+                    max: 18000,
+                    interval: 3000
+                },
+                series: [
+                    {
+                        name: '商品房',
+                        type: 'line',
+                        data: Object.values(avg_price['h1']).slice(-10)
+                    },
+                    {
+                        name: '住宅商品房',
+                        type: 'line',
+                        data: Object.values(avg_price['h2']).slice(-10)
+                    },
+                    {
+                        name: '别墅',
+                        type: 'line',
+                        data: Object.values(avg_price['h3']).slice(-10)
+                    },
+                    {
+                        name: '办公楼',
+                        type: 'line',
+                        data: Object.values(avg_price['h4']).slice(-10)
+                    },
+                    {
+                        name: '商业营业用房',
+                        type: 'line',
+                        data: Object.values(avg_price['h5']).slice(-10)
+                    },
+                    {
+                        name: '其他',
+                        type: 'line',
+                        data: Object.values(avg_price['h6']).slice(-10)
+                    }
+                ]
+            };
+
+        let option_sales = JSON.parse(JSON.stringify(option_price));
+
+        option_sales.title.text = '按用途分商品房销售额（亿元）';
+        option_sales.yAxis = [
+            {
+                type: 'value',
+                min: 0,
+                max: 180000,
+                interval: 30000
+            },
+            {
+                type: 'value',
+                min: 0,
+                max: 18000,
+                interval: 3000
+            }
+        ];
+        option_sales.series = [
+            {
+                name: '商品房',
+                type: 'line',
+                data: Object.values(sales_volume['h1']).slice(-10),
+                yAxisIndex: 0
+            },
+            {
+                name: '住宅商品房',
+                type: 'line',
+                data: Object.values(sales_volume['h2']).slice(-10),
+                yAxisIndex: 0
+            },
+            {
+                name: '别墅',
+                type: 'line',
+                data: Object.values(sales_volume['h3']).slice(-10),
+                yAxisIndex: 1
+            },
+            {
+                name: '办公楼',
+                type: 'line',
+                data: Object.values(sales_volume['h4']).slice(-10),
+                yAxisIndex: 1
+            },
+            {
+                name: '商业营业用房',
+                type: 'line',
+                data: Object.values(sales_volume['h5']).slice(-10),
+                yAxisIndex: 1
+            },
+            {
+                name: '其他',
+                type: 'line',
+                data: Object.values(sales_volume['h6']).slice(-10),
+                yAxisIndex: 1
+            },
+        ];
+
+        option_price && myChart_avg.setOption(option_price);
+        option_sales && myChart_sales.setOption(option_sales);
+    </script>
 {% endblock %}

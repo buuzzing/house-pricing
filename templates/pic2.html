@@ -10,4 +10,11 @@
 
 {% block main_body %}
     <h1 style="padding: 15px">热力图页</h1>
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <div class="layui-col-md10 layui-col-md-offset1">
+                {{ house_map|safe }}
+            </div>
+        </div>
+    </div>
 {% endblock %}
