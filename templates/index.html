@@ -9,5 +9,133 @@
 {% endblock %}
 
 {% block main_body %}
-    <h1>index</h1>
+    <div class="layui-fluid" style="padding: 20px;">
+        <div class="layui-row layui-col-space20">
+            <div class="layui-col-md8">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="background-color: rgb(245, 245, 245);">地图</div>
+                    <div class="layui-card-body" style="padding: 20px; height: 700px;">
+                        <div id="amap" style="width: 100%; height: 100%; margin: 0; padding: 0;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md4">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="background-color: rgb(245, 245, 245);">筛选</div>
+                    <div class="layui-card-body" style="padding: 20px;">
+                        <form class="layui-form" action="javascript: search_house();">
+                            <div class="layui-form-item">
+                                <label><b>每平米价格（单位：元，±2000 元）</b></label>
+                                <input type="text" name="pre_price" id="pre_price" placeholder="请输入价格"
+                                       autocomplete="off" class="layui-input" style="margin-top: 8px;">
+                            </div>
+                            <div class="layui-form-item" style="padding-top: 8px;">
+                                <label><b>房屋面积（单位：平米，±20 平米）</b></label>
+                                <input type="text" name="area" id="area" placeholder="请输入面积"
+                                       autocomplete="off" class="layui-input" style="margin-top: 8px;">
+                            </div>
+                            <div class="layui-form-item" style="padding-top: 8px;">
+                                <label><b>建造年份</b></label>
+                                <div id="time_slider"
+                                     style="margin-top: 14px; padding-left: 35px; padding-right: 35px;"></div>
+                            </div>
+                            <div class="layui-form-item" style="padding-top: 12px;">
+                                <label><b>所在区域</b></label>
+                                <div style="margin-top: 8px;">
+                                    <select name="district" id="district" lay-filter="district">
+                                        <option value=""></option>
+                                        <option value="金水区">金水区</option>
+                                        <option value="郑东新区">郑东新区</option>
+                                        <option value="二七区">二七区</option>
+                                        <option value="管城回族区">管城回族区</option>
+                                        <option value="中原区">中原区</option>
+                                        <option value="惠济区">惠济区</option>
+                                        <option value="郑州高新技术产业开发区">郑州高新技术产业开发区</option>
+                                        <option value="郑州经济技术开发区">郑州经济技术开发区</option>
+                                        <option value="中牟县">中牟县</option>
+                                        <option value="航空港区">航空港区</option>
+                                        <option value="新郑市">新郑市</option>
+                                        <option value="荥阳市">荥阳市</option>
+                                        <option value="上街区">上街区</option>
+                                        <option value="新密市">新密市</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item" style="padding-top: 8px;">
+                                <label><b>楼层高度</b></label>
+                                <div class="layui-input-block" style="margin-top: 8px;">
+                                    <input type="radio" name="floor" value="高楼层" title="高楼层" lay-filter="floor" checked>
+                                    <input type="radio" name="floor" value="中楼层" title="中楼层" lay-filter="floor">
+                                    <input type="radio" name="floor" value="低楼层" title="低楼层" lay-filter="floor">
+                                </div>
+                            </div>
+                            <div class="layui-form-item"
+                                 style="padding-top: 30px; padding-bottom: 20px; text-align: center;">
+                                <button class="layui-btn" lay-submit lay-filter="formDemo"
+                                        style="width: 300px;">查询
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block own_js %}
+    <script src="https://webapi.amap.com/maps?v=1.4.8&key=1ad0e90de54c3f1ca1f5c4962ec6491a"></script>
+    <script>
+        let heatmap_data = {{ heatmap_data|tojson }};
+        let heatmap;
+
+        window.onload = function () {
+            let map = new AMap.Map('amap',{
+                resizeEnable: true,
+                center: [113.657652, 34.743901],
+                zoom: 12
+            });
+            map.plugin(['AMap.Heatmap'], function () {
+                heatmap = new AMap.Heatmap(map, {
+                    radius: 25,
+                    opacity: [0, 0.8]
+                });
+                heatmap.setDataSet({
+                    data: heatmap_data,
+                    max: 52000
+                });
+            });
+        }
+
+        let _time = [1980, 2022];
+        layui.use('slider', function () {
+            let slider = layui.slider;
+
+            slider.render({
+                elem: '#time_slider'
+                , min: 1980
+                , max: 2022
+                , value: [1980, 2022]
+                , range: true
+                , change: function (value) {
+                    _time = value;
+                }
+            });
+        });
+
+        function search_house() {
+            let pre_price = layui.$('#pre_price').val();
+            let area = layui.$('#area').val();
+            let time = _time;
+            let district = layui.$('#district').val();
+            let floor = layui.$('input[name="floor"]:checked').val();
+
+            console.log(pre_price);
+            console.log(area);
+            console.log(time);
+            console.log(district);
+            console.log(floor);
+        }
+    </script>
 {% endblock %}

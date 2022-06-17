@@ -1,4 +1,5 @@
 import json
+import random
 
 from flask import Flask, render_template, request, session, redirect
 from pyecharts import options as opts
@@ -34,7 +35,17 @@ def get_dis_val():
 
 @app.route('/')
 def show_index():
-    return render_template('index.html')
+    res = HouseDB.query_res('SELECT unit_price, lng, lat FROM houseinfo;')
+    heatmap_data = []
+    for row in res:
+        single_data = {
+            'lng': float(row[1]) + round(random.uniform(-0.01, 0.01), 6),
+            'lat': row[2] + round(random.uniform(-0.01, 0.01), 6),
+            'count': row[0]
+        }
+        heatmap_data.append(single_data)
+    return render_template('index.html',
+                           heatmap_data=heatmap_data)
 
 
 @app.route('/list')
