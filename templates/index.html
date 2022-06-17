@@ -91,7 +91,7 @@
         let heatmap;
 
         window.onload = function () {
-            let map = new AMap.Map('amap',{
+            let map = new AMap.Map('amap', {
                 resizeEnable: true,
                 center: [113.657652, 34.743901],
                 zoom: 12
@@ -136,6 +136,8 @@
             console.log(time);
             console.log(district);
             console.log(floor);
+
+            window.location.href = `/list?pre_price=${pre_price}&area=${area}&stime=${time[0]}&etime=${time[1]}&district=${district}&floor=${floor}`;
         }
     </script>
 {% endblock %}

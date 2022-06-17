@@ -45,7 +45,35 @@ def get_house_list():
     page = int(request.args.get('page'))
     limit = int(request.args.get('limit'))
 
-    res = HouseDB.query_res(f'SELECT * FROM houseinfo ORDER BY id LIMIT {limit} OFFSET {(page - 1) * limit};')
+    pre_price = request.args.get('pre_price')
+    area = request.args.get('area')
+    stime = request.args.get('stime')
+    etime = request.args.get('etime')
+    district = request.args.get('district')
+    floor = request.args.get('floor')
+
+    where_sql = ''
+    if stime is not None and stime != '':
+        where_sql = f'WHERE build_year BETWEEN {stime} AND {etime} '
+
+    if pre_price is not None and pre_price != '':
+        where_sql += f'AND unit_price BETWEEN {int(pre_price) - 2000} AND {int(pre_price) + 2000} '
+    if area is not None and area != '':
+        where_sql += f'AND area BETWEEN {float(area) - 20} AND {float(area) + 20} '
+    if district is not None and district != '':
+        where_sql += f'AND location like \'{district}%\' '
+    if floor is not None and floor != '':
+        where_sql += f'AND floor like \'{floor}%\' '
+
+    print(where_sql)
+    res = HouseDB.query_res(f'SELECT COUNT(*) FROM houseinfo {where_sql}')
+
+    tot = 0
+    for row in res:
+        tot = int(row[0])
+
+    res = HouseDB.query_res(
+        f'SELECT * FROM houseinfo {where_sql} ORDER BY id LIMIT {limit} OFFSET {(page - 1) * limit};')
 
     data = []
     for row in res:
@@ -65,7 +93,7 @@ def get_house_list():
 
     res = {
         'code': 0,
-        'count': 1505,
+        'count': tot,
         'data': data,
     }
 

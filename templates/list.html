@@ -16,6 +16,17 @@
 
 {% block own_js %}
     <script>
+        let params = window.location.search;
+
+        function getQueryString(name) {
+            let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            let r = window.location.search.slice(1).match(reg);
+            if (r != null) {
+                return decodeURIComponent(r[2]);
+            }
+            return null;
+        }
+
         layui.use('table', function () {
             let table = layui.table;
 
@@ -24,7 +35,7 @@
                 , height: 'full-120'
                 , cellMinWidth: 80
                 , limit: 20
-                , url: '/api/getHouseList'
+                , url: `/api/getHouseList${params}`
                 , page: true
                 , cols: [[
                     {field: 'id', title: 'ID', sort: true, fixed: 'left'}
