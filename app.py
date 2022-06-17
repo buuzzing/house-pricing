@@ -1,10 +1,6 @@
 import json
-import random
 
-from flask import Flask, render_template, request, session, redirect
-from pyecharts import options as opts
-from pyecharts.charts import Bar, Map
-from pyecharts.globals import ThemeType
+from flask import Flask, render_template
 
 from api import api_blueprint
 from db import HouseDB
@@ -14,23 +10,18 @@ app.secret_key = '0x7f'
 app.register_blueprint(api_blueprint)
 
 
-def get_dis_val():
+def get_prices():
     res = HouseDB.query_res('SELECT location, unit_price FROM houseinfo;')
 
-    nums = {}
     prices = {}
+
     for row in res:
-        if row[0].split()[0] not in nums:
-            nums[row[0].split()[0]] = 1
-            prices[row[0].split()[0]] = 0.
-        else:
-            nums[row[0].split()[0]] += 1
-        prices[row[0].split()[0]] += float(row[1])
+        dis_name = row[0].strip().split()[0]
+        if dis_name not in prices:
+            prices[dis_name] = []
+        prices[dis_name].append(row[1])
 
-    dis = list(nums.keys())
-    val = [round(prices[dis_name] / nums[dis_name], 2) for dis_name in dis]
-
-    return dis, val
+    return prices
 
 
 @app.route('/')
@@ -39,8 +30,8 @@ def show_index():
     heatmap_data = []
     for row in res:
         single_data = {
-            'lng': float(row[1]) + round(random.uniform(-0.01, 0.01), 6),
-            'lat': row[2] + round(random.uniform(-0.01, 0.01), 6),
+            'lng': float(row[1]),
+            'lat': float(row[2]),
             'count': row[0]
         }
         heatmap_data.append(single_data)
@@ -72,34 +63,13 @@ def show_pic1():
 
 @app.route('/pic2')
 def show_pic2():
-    dis, val = get_dis_val()
-
-    house_map = (
-        Map(init_opts=opts.InitOpts(theme=ThemeType.MACARONS, width='1200px', height='700px'))
-        .add(
-            series_name="每平米房价",
-            data_pair=list(zip(dis, val)),
-            maptype='郑州',
-            is_map_symbol_show=False,
-            zoom=0.9,
-        )
-        .set_global_opts(
-            title_opts=opts.TitleOpts(
-                title='郑州市各区每平米平均房价',
-                subtitle='数据来源：链家网郑州',
-                pos_right='center',
-                pos_top='5%',
-                pos_bottom='10%',
-            ),
-            visualmap_opts=opts.VisualMapOpts(
-                max_=14_000,
-                min_=4_000,
-            ),
-        )
-        .render_embed()
-    )
-
-    return render_template('pic2.html', house_map=house_map)
+    prices = get_prices()
+    with open('static/database/history.json', 'r') as f:
+        history_price = f.read()
+    history_price = json.loads(history_price)
+    return render_template('pic2.html',
+                           prices=prices,
+                           history_price=history_price)
 
 
 @app.route('/surrounding')

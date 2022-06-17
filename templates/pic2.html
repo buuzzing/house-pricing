@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 
 {% block title %}
-    热力图
+    统计与预测
 {% endblock %}
 
 {% block four %}
@@ -9,12 +9,161 @@
 {% endblock %}
 
 {% block main_body %}
-    <h1 style="padding: 15px">热力图页</h1>
-    <div class="layui-fluid">
-        <div class="layui-row">
-            <div class="layui-col-md10 layui-col-md-offset1">
-                {{ house_map|safe }}
+    <div class="layui-fluid" style="padding: 20px;">
+        <div class="layui-row layui-col-space20">
+            <div class="layui-col-md8">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="background-color: rgb(245, 245, 245);">结果展示</div>
+                    <div class="layui-card-body" style="padding: 20px; height: 700px;">
+                        <div id="pre_echarts" style="width: auto; height: 650px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md4">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="background-color: rgb(245, 245, 245);">条件选择</div>
+                    <div class="layui-card-body" style="padding: 20px;">
+                        <form class="layui-form" action="javascript: make_pre();">
+                            <div class="layui-form-item" style="padding-top: 12px;">
+                                <label><b>所在区域</b></label>
+                                <div style="margin-top: 8px;">
+                                    <select name="district" id="district" required lay-verify="required"
+                                            lay-filter="district">
+                                        <option value=""></option>
+                                        <option value="金水区">金水区</option>
+                                        <option value="郑东新区">郑东新区</option>
+                                        <option value="二七区">二七区</option>
+                                        <option value="管城回族区">管城回族区</option>
+                                        <option value="中原区">中原区</option>
+                                        <option value="惠济区">惠济区</option>
+                                        <option value="郑州高新技术产业开发区">郑州高新技术产业开发区</option>
+                                        <option value="郑州经济技术开发区">郑州经济技术开发区</option>
+                                        <option value="中牟县">中牟县</option>
+                                        <option value="新郑市">新郑市</option>
+                                        <option value="荥阳市">荥阳市</option>
+                                        <option value="上街区">上街区</option>
+                                        <option value="新密市">新密市</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item" style="padding-top: 8px;">
+                                <label><b>楼层高度</b></label>
+                                <div class="layui-input-block" style="margin-top: 8px;">
+                                    <input type="radio" name="floor" value="高楼层" title="高楼层" lay-filter="floor" checked>
+                                    <input type="radio" name="floor" value="中楼层" title="中楼层" lay-filter="floor">
+                                    <input type="radio" name="floor" value="低楼层" title="低楼层" lay-filter="floor">
+                                </div>
+                            </div>
+                            <div class="layui-form-item"
+                                 style="padding-top: 30px; padding-bottom: 20px; text-align: center;">
+                                <button class="layui-btn" lay-submit lay-filter="formDemo"
+                                        style="width: 300px;">查询
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block own_js %}
+    <script src="{{ url_for('static', filename='js/dataTool.js') }}"></script>
+    <script>
+        let my_echarts = echarts.init(document.getElementById('pre_echarts'));
+        let option;
+        let prices = {{ prices|tojson }};
+        let dis_name = Object.keys(prices);
+        let dis_value = echarts.dataTool.prepareBoxplotData(Object.values(prices));
+
+        option = {
+            title: {
+                text: '郑州各城区平均每平米房价箱型图',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                left: '10%',
+                right: ' 10%',
+                bottom: '15%'
+            },
+            xAxis: {
+                type: 'category',
+                data: dis_name
+            },
+            yAxis: {
+                type: 'value',
+                name: '每平米售价（元）',
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                name: 'boxplot',
+                type: 'boxplot',
+                data: dis_value.boxData,
+                tooltip: {
+                    formatter: function (param) {
+                        return [
+                            param.name,
+                            `upper: ${param.data[5]}`,
+                            `Q3: ${param.data[4]}`,
+                            `median: ${param.data[3]}`,
+                            `Q1: ${param.data[2]}`,
+                            `lower: ${param.data[1]}`,
+                        ].join('<br/>');
+                    }
+                }
+            }
+        };
+
+        option && my_echarts.setOption(option);
+
+        let history_price = {{ history_price|tojson }};
+
+        function make_pre() {
+            let district = layui.$('#district').val();
+            let floor = layui.$('input[name="floor"]:checked').val();
+
+            let _price = history_price[district].slice().reverse();
+            _price.push(2 * history_price[district][0] - history_price[district][1]);
+
+            let _year = [];
+            let tot = history_price[district].length;
+
+            for (let i = 2023 - tot; i <= 2023; ++i)
+                _year.push(i)
+
+            option = {
+                title: {
+                    text: `${district}历史统计与预测`,
+                    left: 'center'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: _year
+                },
+                yAxis: {
+                    type: 'value',
+                    scale: true
+                },
+                series: [
+                    {
+                        data: _price,
+                        type: 'line',
+                        smooth: true
+                    }
+                ]
+            };
+
+            my_echarts.clear();
+            my_echarts.setOption(option);
+        }
+    </script>
 {% endblock %}
